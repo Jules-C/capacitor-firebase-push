@@ -19,8 +19,11 @@ import com.getcapacitor.PluginHandle;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.installations.FirebaseInstallations;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
@@ -52,36 +55,67 @@ public class FirebasePushPlugin extends Plugin {
     @PluginMethod
     public void register(PluginCall call) {
         new Handler()
-            .post(
-                () -> {
-                    FirebaseApp.initializeApp(this.getContext());
-                    registered = true;
-                    this.sendStacked();
-                    call.resolve();
+                .post(
+                        () -> {
+                            FirebaseApp.initializeApp(this.getContext());
+                            registered = true;
+                            this.sendStacked();
+                            call.resolve();
 
-                    FirebaseMessaging
-                        .getInstance()
-                        .getToken()
-                        .addOnCompleteListener(
-                            task -> {
-                                if (task.isSuccessful()) {
-                                    this.sendToken(task.getResult());
-                                }
-                            }
-                        );
-                }
-            );
+                          FirebaseInstallations
+                                    .getInstance()
+                                    .getToken(true)
+                                    .addOnCompleteListener(
+                                            task -> {
+                                                if (task.isSuccessful()) {
+                                                  this.sendToken(task.getResult().getToken());
+                                                }
+                                            });
+                        });
     }
+
+//    @PluginMethod
+//    public void register(PluginCall call) {
+//        new Handler()
+//                .post(
+//                        () -> {
+//                            FirebaseApp.initializeApp(this.getContext());
+//                            registered = true;
+//                            this.sendStacked();
+//                            call.resolve();
+//                            FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+//                            FirebaseInstanceId
+//                                    .getInstance()
+//                                    .getInstanceId()
+//                                    .addOnSuccessListener(
+//                                            getActivity(),
+//                                            new OnSuccessListener<InstanceIdResult>() {
+//                                                @Override
+//                                                public void onSuccess(InstanceIdResult instanceIdResult) {
+//                                                    sendToken(instanceIdResult.getToken());
+//                                                }
+//                                            });
+//                        });
+//        FirebaseInstanceId
+//                .getInstance()
+//                .getInstanceId()
+//                .addOnFailureListener(
+//                        new OnFailureListener() {
+//                            public void onFailure(Exception e) {
+//                                Log.e(String.valueOf(e), "ah!");
+//                            }
+//                        });
+//        call.resolve();
+//    }
 
     @PluginMethod
     public void unregister(PluginCall call) {
         new Handler()
-            .post(
-                () -> {
-                    FirebaseInstallations.getInstance().delete();
-                    call.resolve();
-                }
-            );
+                .post(
+                        () -> {
+                            FirebaseInstallations.getInstance().delete();
+                            call.resolve();
+                        });
     }
 
     @PluginMethod
@@ -194,28 +228,27 @@ public class FirebasePushPlugin extends Plugin {
         }
 
         Log.d(
-            TAG,
-            "sendMessage(): messageType=" +
-            messageType +
-            "; id=" +
-            id +
-            "; title=" +
-            title +
-            "; body=" +
-            body +
-            "; sound=" +
-            sound +
-            "; vibrate=" +
-            vibrate +
-            "; color=" +
-            color +
-            "; icon=" +
-            icon +
-            "; channel=" +
-            channelId +
-            "; data=" +
-            data.toString()
-        );
+                TAG,
+                "sendMessage(): messageType=" +
+                        messageType +
+                        "; id=" +
+                        id +
+                        "; title=" +
+                        title +
+                        "; body=" +
+                        body +
+                        "; sound=" +
+                        sound +
+                        "; vibrate=" +
+                        vibrate +
+                        "; color=" +
+                        color +
+                        "; icon=" +
+                        icon +
+                        "; channel=" +
+                        channelId +
+                        "; data=" +
+                        data.toString());
         Bundle bundle = new Bundle();
         for (String key : data.keySet()) {
             bundle.putString(key, data.get(key));
@@ -263,7 +296,9 @@ public class FirebasePushPlugin extends Plugin {
 
     public static void onNewRemoteMessage(RemoteMessage message) {
         FirebasePushPlugin pushPlugin = FirebasePushPlugin.getInstance();
+        Log.d(TAG, "onNewRemoteMessage");
         if (pushPlugin != null) {
+            Log.d(TAG, "onNewRemoteMessage, pushPlugin!= null");
             pushPlugin.sendRemoteMessage(message);
         }
     }
@@ -280,6 +315,7 @@ public class FirebasePushPlugin extends Plugin {
     }
 
     private void sendStacked() {
+      Log.d(TAG, "sendStacked()");
         if (FirebasePushPlugin.notificationStack != null) {
             for (Bundle bundle : FirebasePushPlugin.notificationStack) {
                 this.sendRemoteBundle(bundle);
@@ -289,13 +325,18 @@ public class FirebasePushPlugin extends Plugin {
     }
 
     public static FirebasePushPlugin getInstance() {
+      Log.d(TAG,"getInstance()");
         if (staticBridge != null && staticBridge.getWebView() != null) {
+          Log.d(TAG,"getInstance()2");
             PluginHandle handle = staticBridge.getPlugin("FirebasePush");
             if (handle == null) {
+              Log.d(TAG,"getInstance()3");
                 return null;
             }
+          Log.d(TAG,"getInstance()4");
             return (FirebasePushPlugin) handle.getInstance();
         }
+      Log.d(TAG,"getInstance()5");
         return null;
     }
 
