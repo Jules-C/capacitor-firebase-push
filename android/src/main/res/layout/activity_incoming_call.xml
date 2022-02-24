@@ -7,15 +7,15 @@
     android:padding="16dp"
     tools:context="de.einfachhans.firebase.IncomingCallActivity">
 
-    <ImageView
-        android:layout_width="240dp"
-        android:layout_height="1dp"
-        android:layout_gravity="center"
-        android:scaleType="fitEnd"
-        android:layout_weight="1"
-        android:src="@drawable/ic_trusted_care_logo_lang" />
+  <ImageView
+    android:layout_width="240dp"
+    android:layout_height="1dp"
+    android:layout_gravity="center"
+    android:layout_weight="1"
+    android:scaleType="fitCenter"
+    android:src="@drawable/ic_launcher_round" />
 
-    <ImageView
+  <ImageView
         android:id="@+id/ivAnimatedCircle"
         android:layout_width="200dp"
         android:layout_height="200dp"
@@ -24,12 +24,13 @@
         android:layout_marginBottom="16dp"
         />
 
-    <TextView
+
+  <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/nunito_regular"
         android:gravity="center"
-        android:text="Eingehender Videoanruf"
+        android:text="Incoming Call"
         android:textColor="#00054b"
         android:textSize="20sp" />
 
@@ -61,22 +62,22 @@
             android:drawableTop="@drawable/ic_decline"
             android:drawablePadding="8dp"
             android:fontFamily="@font/nunito_regular"
-            android:text="Ablehnen"
+            android:text="Decline"
             android:textAllCaps="false"
             android:textColor="#00054b" />
 
-        <Button
-            android:id="@+id/btnAccept"
-            android:layout_width="110dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:background="@android:color/transparent"
-            android:drawableTop="@drawable/ic_accept"
-            android:drawablePadding="8dp"
-            android:fontFamily="@font/nunito_regular"
-            android:text="Annehmen"
-            android:textAllCaps="false"
-            android:textColor="#00054b" />
+      <Button
+        android:id="@+id/btnAccept"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/transparent"
+        android:drawableTop="@drawable/ic_accept"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/nunito_regular"
+        android:text="Accept"
+        android:textAllCaps="false"
+        android:textColor="#00054b" />
 
     </RelativeLayout>
 

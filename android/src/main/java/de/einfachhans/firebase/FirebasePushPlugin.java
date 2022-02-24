@@ -45,33 +45,12 @@ public class FirebasePushPlugin extends Plugin {
 
     public NotificationManager notificationManager;
 
+
     @Override
     public void load() {
         notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
         staticBridge = this.bridge;
-    }
-
-    @PluginMethod
-    public void register(PluginCall call) {
-        new Handler()
-                .post(
-                        () -> {
-                            FirebaseApp.initializeApp(this.getContext());
-                            registered = true;
-                            this.sendStacked();
-                            call.resolve();
-
-                          FirebaseInstallations
-                                    .getInstance()
-                                    .getToken(true)
-                                    .addOnCompleteListener(
-                                            task -> {
-                                                if (task.isSuccessful()) {
-                                                  this.sendToken(task.getResult().getToken());
-                                                }
-                                            });
-                        });
     }
 
 //    @PluginMethod
@@ -83,30 +62,52 @@ public class FirebasePushPlugin extends Plugin {
 //                            registered = true;
 //                            this.sendStacked();
 //                            call.resolve();
-//                            FirebaseMessaging.getInstance().setAutoInitEnabled(true);
-//                            FirebaseInstanceId
+//
+//                          FirebaseInstallations
 //                                    .getInstance()
-//                                    .getInstanceId()
-//                                    .addOnSuccessListener(
-//                                            getActivity(),
-//                                            new OnSuccessListener<InstanceIdResult>() {
-//                                                @Override
-//                                                public void onSuccess(InstanceIdResult instanceIdResult) {
-//                                                    sendToken(instanceIdResult.getToken());
+//                                    .getToken(true)
+//                                    .addOnCompleteListener(
+//                                            task -> {
+//                                                if (task.isSuccessful()) {
+//                                                  this.sendToken(task.getResult().getToken());
 //                                                }
 //                                            });
 //                        });
-//        FirebaseInstanceId
-//                .getInstance()
-//                .getInstanceId()
-//                .addOnFailureListener(
-//                        new OnFailureListener() {
-//                            public void onFailure(Exception e) {
-//                                Log.e(String.valueOf(e), "ah!");
-//                            }
-//                        });
-//        call.resolve();
 //    }
+
+    @PluginMethod
+    public void register(PluginCall call) {
+        new Handler()
+                .post(
+                        () -> {
+                            FirebaseApp.initializeApp(this.getContext());
+                            registered = true;
+                            this.sendStacked();
+                            call.resolve();
+                            FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+                            FirebaseInstanceId
+                                    .getInstance()
+                                    .getInstanceId()
+                                    .addOnSuccessListener(
+                                            getActivity(),
+                                            new OnSuccessListener<InstanceIdResult>() {
+                                                @Override
+                                                public void onSuccess(InstanceIdResult instanceIdResult) {
+                                                    sendToken(instanceIdResult.getToken());
+                                                }
+                                            });
+                        });
+        FirebaseInstanceId
+                .getInstance()
+                .getInstanceId()
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            public void onFailure(Exception e) {
+                                Log.e(String.valueOf(e), "ah!");
+                            }
+                        });
+        call.resolve();
+    }
 
     @PluginMethod
     public void unregister(PluginCall call) {
@@ -206,7 +207,7 @@ public class FirebasePushPlugin extends Plugin {
         String channelId = null;
 
         Map<String, String> data = message.getData();
-
+        Log.d(TAG, String.valueOf(data));
         if (message.getNotification() != null) {
             messageType = "notification";
             id = message.getMessageId();
@@ -268,6 +269,7 @@ public class FirebasePushPlugin extends Plugin {
         this.putKVInBundle("google.ttl", String.valueOf(message.getTtl()), bundle);
 
         if (!registered) {
+          Log.d(TAG, "if!registered");
             if (FirebasePushPlugin.notificationStack == null) {
                 FirebasePushPlugin.notificationStack = new ArrayList<>();
             }
@@ -301,6 +303,7 @@ public class FirebasePushPlugin extends Plugin {
             Log.d(TAG, "onNewRemoteMessage, pushPlugin!= null");
             pushPlugin.sendRemoteMessage(message);
         }
+      Log.d(TAG, "pushPlugin=null");
     }
 
     @Override

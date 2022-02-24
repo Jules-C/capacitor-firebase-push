@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -23,6 +24,7 @@ public class IncomingCallService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+      Log.d("I shouldn't be here!", "FIX THIS");
         Notification notification = buildNotification();
         startForeground(1, notification);
         sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
@@ -38,7 +40,7 @@ public class IncomingCallService extends Service {
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_trusted_care_logo_lang)
+                        .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle("Incoming call")
                         .setContentText("(919) 555-1234")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
