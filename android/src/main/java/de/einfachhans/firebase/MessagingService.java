@@ -1,5 +1,7 @@
 package de.einfachhans.firebase;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -9,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
@@ -19,6 +22,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.widget.EditText;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
@@ -39,7 +43,7 @@ public class MessagingService extends FirebaseMessagingService {
 
   // VoIP
   private static final String CHANNEL_VOIP = "Voip";
-  private static final String CHANNEL_NAME = "TCVoip";
+  private static final String CHANNEL_NAME = "FracTELfoneVoip";
   private BroadcastReceiver voipNotificationActionBR;
   public static final int VOIP_NOTIFICATION_ID = 168697;
   public static final int oneTimeID = (int) SystemClock.uptimeMillis();
@@ -56,8 +60,8 @@ public class MessagingService extends FirebaseMessagingService {
       // Check if message contains a data payload.
       if (remoteMessage.getData().size() > 0) {
         Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-        showVOIPNotification(remoteMessage.getData());
-        //startActivity(intentForLaunchActivity());
+        showVOIPNotification(remoteMessage);
+        // startActivity(intentForLaunchActivity());
       }
       // TODO: Add "type" to payload
       // String notifDataType = remoteMessage.getData().get("type");
@@ -78,7 +82,6 @@ public class MessagingService extends FirebaseMessagingService {
 
     // startCallService();
 
-    FirebasePushPlugin.onNewRemoteMessage(remoteMessage);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.O)
@@ -105,279 +108,311 @@ public class MessagingService extends FirebaseMessagingService {
   @RequiresApi(api = Build.VERSION_CODES.M)
   // private void sendNotification(Map<String, String> messageData) {
 
-  //   String channelId = "fcm_call_channel";
-  //   String channelName = "Incoming Call";
-  //  // Uri uri = Uri.parse("viauapp://");
+  // String channelId = "fcm_call_channel";
+  // String channelName = "Incoming Call";
+  // // Uri uri = Uri.parse("viauapp://");
 
-  //   Log.d(TAG, "sendNotification()");
-  //   // Prepare data from messageData
-  //   String caller = "Unknown caller";
-  //   if (messageData.containsKey("Username")) {
-  //     caller = messageData.get("Username");
-  //   }
-  //   String callId = messageData.get("ConnectionId");
-  //   String callbackUrl = messageData.get("ConnectionId");
+  // Log.d(TAG, "sendNotification()");
+  // // Prepare data from messageData
+  // String caller = "Unknown caller";
+  // if (messageData.containsKey("Username")) {
+  // caller = messageData.get("Username");
+  // }
+  // String callId = messageData.get("ConnectionId");
+  // String callbackUrl = messageData.get("ConnectionId");
 
-  //   Uri notification_sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-  //   // String notification_title= remoteMessage.getData().get("title");
-  //   String notification_title = "Incoming Call";
+  // Uri notification_sound =
+  // RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+  // // String notification_title= remoteMessage.getData().get("title");
+  // String notification_title = "Incoming Call";
 
-  //   // Intent intent = new Intent(this, IncomingCallActivity.class);
-  //   // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-  //   // PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-  //   // PendingIntent.FLAG_ONE_SHOT);
+  // // Intent intent = new Intent(this, IncomingCallActivity.class);
+  // // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+  // // PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+  // // PendingIntent.FLAG_ONE_SHOT);
 
-  //   // // notification action buttons start
-  //   // PendingIntent acptIntent =
-  //   // IncomingCallActivity.getActionIntent(oneTimeID,uri,this);
-  //   // PendingIntent rjctIntent =
-  //   // IncomingCallActivity.getActionIntent(oneTimeID,uri, this);
+  // // // notification action buttons start
+  // // PendingIntent acptIntent =
+  // // IncomingCallActivity.getActionIntent(oneTimeID,uri,this);
+  // // PendingIntent rjctIntent =
+  // // IncomingCallActivity.getActionIntent(oneTimeID,uri, this);
 
-  //   // NotificationCompat.Action rejectCall=new
-  //   // NotificationCompat.Action.Builder(R.drawable.rjt_btn,getActionText("Decline",android.R.color.holo_red_light),rjctIntent).build();
-  //   // NotificationCompat.Action acceptCall=new
-  //   // NotificationCompat.Action.Builder(R.drawable.acpt_btn,getActionText("Answer",android.R.color.holo_green_light),acptIntent).build();
-  //   // //end
+  // // NotificationCompat.Action rejectCall=new
+  // //
+  // NotificationCompat.Action.Builder(R.drawable.rjt_btn,getActionText("Decline",android.R.color.holo_red_light),rjctIntent).build();
+  // // NotificationCompat.Action acceptCall=new
+  // //
+  // NotificationCompat.Action.Builder(R.drawable.acpt_btn,getActionText("Answer",android.R.color.holo_green_light),acptIntent).build();
+  // // //end
 
-  //   // Intent for LockScreen or tapping on notification
-  //   Intent fullScreenIntent = new Intent(this, IncomingCallActivity.class);
-  //   fullScreenIntent.putExtra("caller", caller);
-  //   PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
-  //       fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+  // // Intent for LockScreen or tapping on notification
+  // Intent fullScreenIntent = new Intent(this, IncomingCallActivity.class);
+  // fullScreenIntent.putExtra("caller", caller);
+  // PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
+  // fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-  //   // Intent for tapping on Answer
-  //   Intent acceptIntent = new Intent(IncomingCallActivity.VOIP_ACCEPT);
-  //   PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, 10, acceptIntent, 0);
+  // // Intent for tapping on Answer
+  // Intent acceptIntent = new Intent(IncomingCallActivity.VOIP_ACCEPT);
+  // PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, 10,
+  // acceptIntent, 0);
 
-  //   // Intent for tapping on Reject
-  //   Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
-  //   PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20, declineIntent, 0);
+  // // Intent for tapping on Reject
+  // Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
+  // PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20,
+  // declineIntent, 0);
 
-  //   // when device locked show fullscreen notification start
-  //   // Intent i = new Intent(getApplicationContext(), IncomingCallActivity.class);
-  //   // i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-  //   // Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-  //   // i.putExtra("APP_STATE", isAppRunning());
-  //   // i.putExtra("caller", caller);
-  //   // i.putExtra("FALL_BACK", true);
-  //   // i.putExtra("NOTIFICATION_ID", oneTimeID);
-  //   // PendingIntent fullScreenIntent = PendingIntent.getActivity(this, 0 /* Request
-  //   // code */, i,
-  //   // PendingIntent.FLAG_ONE_SHOT);
-  //   // end
+  // // when device locked show fullscreen notification start
+  // // Intent i = new Intent(getApplicationContext(),
+  // IncomingCallActivity.class);
+  // // i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+  // // Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+  // // i.putExtra("APP_STATE", isAppRunning());
+  // // i.putExtra("caller", caller);
+  // // i.putExtra("FALL_BACK", true);
+  // // i.putExtra("NOTIFICATION_ID", oneTimeID);
+  // // PendingIntent fullScreenIntent = PendingIntent.getActivity(this, 0 /*
+  // Request
+  // // code */, i,
+  // // PendingIntent.FLAG_ONE_SHOT);
+  // // end
 
-  //   NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
-  //       .setSmallIcon(getResources().getIdentifier("pushicon", "drawable", getPackageName()))
-  //       .setContentTitle(notification_title)
-  //       .setContentText(caller)
-  //       .setPriority(NotificationCompat.PRIORITY_MAX)
-  //       .setCategory(NotificationCompat.CATEGORY_CALL)
-  //       // Show main activity on lock screen or when tapping on notification
-  //       .setFullScreenIntent(fullScreenPendingIntent, true)
-  //       // Show Accept button
-  //       .addAction(new NotificationCompat.Action(0, "Accept",
-  //           acceptPendingIntent))
-  //       // Show decline action
-  //       .addAction(new NotificationCompat.Action(0, "Decline",
-  //           declinePendingIntent))
-  //       // Make notification dismiss on user input action
-  //       .setAutoCancel(true)
-  //       // Cannot be swiped by user
-  //       .setOngoing(true)
-  //       // Set ringtone to notification (< Android O)
-  //       .setSound(notification_sound)
+  // NotificationCompat.Builder notificationBuilder = new
+  // NotificationCompat.Builder(this, channelId)
+  // .setSmallIcon(getResources().getIdentifier("pushicon", "drawable",
+  // getPackageName()))
+  // .setContentTitle(notification_title)
+  // .setContentText(caller)
+  // .setPriority(NotificationCompat.PRIORITY_MAX)
+  // .setCategory(NotificationCompat.CATEGORY_CALL)
+  // // Show main activity on lock screen or when tapping on notification
+  // .setFullScreenIntent(fullScreenPendingIntent, true)
+  // // Show Accept button
+  // .addAction(new NotificationCompat.Action(0, "Accept",
+  // acceptPendingIntent))
+  // // Show decline action
+  // .addAction(new NotificationCompat.Action(0, "Decline",
+  // declinePendingIntent))
+  // // Make notification dismiss on user input action
+  // .setAutoCancel(true)
+  // // Cannot be swiped by user
+  // .setOngoing(true)
+  // // Set ringtone to notification (< Android O)
+  // .setSound(notification_sound)
 
-  //       // .setContentIntent(pendingIntent)
-  //       .setDefaults(Notification.DEFAULT_VIBRATE);
+  // // .setContentIntent(pendingIntent)
+  // .setDefaults(Notification.DEFAULT_VIBRATE);
 
-  //   // .setSmallIcon(R.mipmap.ic_launcher);
+  // // .setSmallIcon(R.mipmap.ic_launcher);
 
-  //   Notification incomingCallNotification = notificationBuilder.build();
+  // Notification incomingCallNotification = notificationBuilder.build();
 
-  //   NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-  //   int importance = NotificationManager.IMPORTANCE_HIGH;
+  // NotificationManagerCompat notificationManager =
+  // NotificationManagerCompat.from(this);
+  // int importance = NotificationManager.IMPORTANCE_HIGH;
 
-  //   // channel creation start
-  //   if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-  //     Log.d(TAG, "createChannel start");
-  //     NotificationChannel mChannel = new NotificationChannel(
-  //         channelId, channelName, importance);
-  //     AudioAttributes attributes = new AudioAttributes.Builder()
-  //         .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-  //         .build();
-  //     mChannel.setSound(notification_sound, attributes);
-  //     mChannel.setDescription(channelName);
-  //     mChannel.enableLights(true);
-  //     mChannel.enableVibration(true);
-  //     NotificationManager notificationManager2 = getSystemService(NotificationManager.class);
-  //     notificationManager2.createNotificationChannel(mChannel);
-  //   }
-  //   // end
+  // // channel creation start
+  // if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+  // Log.d(TAG, "createChannel start");
+  // NotificationChannel mChannel = new NotificationChannel(
+  // channelId, channelName, importance);
+  // AudioAttributes attributes = new AudioAttributes.Builder()
+  // .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+  // .build();
+  // mChannel.setSound(notification_sound, attributes);
+  // mChannel.setDescription(channelName);
+  // mChannel.enableLights(true);
+  // mChannel.enableVibration(true);
+  // NotificationManager notificationManager2 =
+  // getSystemService(NotificationManager.class);
+  // notificationManager2.createNotificationChannel(mChannel);
+  // }
+  // // end
 
-  //   notificationManager.notify(oneTimeID, incomingCallNotification);
+  // notificationManager.notify(oneTimeID, incomingCallNotification);
 
-  //   // Add broadcast receiver for notification button actions
-  //   if (voipNotificationActionBR == null) {
-  //     IntentFilter filter = new IntentFilter();
-  //     filter.addAction(IncomingCallActivity.VOIP_ACCEPT);
-  //     filter.addAction(IncomingCallActivity.VOIP_DECLINE);
+  // // Add broadcast receiver for notification button actions
+  // if (voipNotificationActionBR == null) {
+  // IntentFilter filter = new IntentFilter();
+  // filter.addAction(IncomingCallActivity.VOIP_ACCEPT);
+  // filter.addAction(IncomingCallActivity.VOIP_DECLINE);
 
-  //     Context appContext = this.getApplicationContext();
-  //     voipNotificationActionBR = new BroadcastReceiver() {
-  //       @Override
-  //       public void onReceive(Context context, Intent intent) {
-  //         // Remove BR after responding to notification action
-  //         appContext.unregisterReceiver(voipNotificationActionBR);
-  //         voipNotificationActionBR = null;
+  // Context appContext = this.getApplicationContext();
+  // voipNotificationActionBR = new BroadcastReceiver() {
+  // @Override
+  // public void onReceive(Context context, Intent intent) {
+  // // Remove BR after responding to notification action
+  // appContext.unregisterReceiver(voipNotificationActionBR);
+  // voipNotificationActionBR = null;
 
-  //         // Handle action
-  //         dismissVOIPNotification();
-  //         String voipStatus = intent.getAction();
-  //         // Update Webhook status to CONNECTED
-  //         // updateWebhookVOIPStatus(callbackUrl, callId, voipStatus);
+  // // Handle action
+  // dismissVOIPNotification();
+  // String voipStatus = intent.getAction();
+  // // Update Webhook status to CONNECTED
+  // // updateWebhookVOIPStatus(callbackUrl, callId, voipStatus);
 
-  //         // Start cordova activity on answer
-  //         if (voipStatus.equals(IncomingCallActivity.VOIP_ACCEPT)) {
-  //           startActivity(intentForLaunchActivity());
-  //         }
-  //       }
-  //     };
+  // // Start cordova activity on answer
+  // if (voipStatus.equals(IncomingCallActivity.VOIP_ACCEPT)) {
+  // startActivity(intentForLaunchActivity());
+  // }
+  // }
+  // };
 
-  //     appContext.registerReceiver(voipNotificationActionBR, filter);
-  //   }
+  // appContext.registerReceiver(voipNotificationActionBR, filter);
+  // }
   // }
 
-  //   // VoIP implementation
-    private Intent intentForLaunchActivity() {
-    Log.d(TAG, "intentForLaunchActivity()");
-      PackageManager pm = getPackageManager();
-      return pm.getLaunchIntentForPackage(getApplicationContext().getPackageName());
+  // VoIP implementation
+  private Intent intentForLaunchActivity() {
+    PackageManager pm = getPackageManager();
+    return pm.getLaunchIntentForPackage(getApplicationContext().getPackageName());
   }
 
   private Uri defaultRingtoneUri() {
-      return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+    return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
   }
 
   private void createNotificationChannel() {
-      // Create the NotificationChannel, but only on API 26+ because
-      // the NotificationChannel class is new and not in the support library
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          int importance = NotificationManager.IMPORTANCE_HIGH;
-          NotificationChannel channel = new NotificationChannel(CHANNEL_VOIP, CHANNEL_NAME, importance);
-          channel.setDescription("Channel For VOIP Calls");
+    // Create the NotificationChannel, but only on API 26+ because
+    // the NotificationChannel class is new and not in the support library
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      int importance = NotificationManager.IMPORTANCE_HIGH;
+      NotificationChannel channel = new NotificationChannel(CHANNEL_VOIP, CHANNEL_NAME, importance);
+      channel.setDescription("Channel For VOIP Calls");
 
-          // Set ringtone to notification (>= Android O)
-          AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                  .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                  .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                  .build();
-          channel.setSound(defaultRingtoneUri(), audioAttributes);
+      // Set ringtone to notification (>= Android O)
+      AudioAttributes audioAttributes = new AudioAttributes.Builder()
+          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+          .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+          .build();
+      channel.setSound(defaultRingtoneUri(), audioAttributes);
 
-          // Register the channel with the system; you can't change the importance
-          // or other notification behaviors after this
-          NotificationManager notificationManager = getSystemService(NotificationManager.class);
-          notificationManager.createNotificationChannel(channel);
-      }
+      // Register the channel with the system; you can't change the importance
+      // or other notification behaviors after this
+      NotificationManager notificationManager = getSystemService(NotificationManager.class);
+      notificationManager.createNotificationChannel(channel);
+      Log.d(TAG, "createNotificationChannel");
+    }
   }
 
-  private void showVOIPNotification(Map<String, String> messageData) {
-      createNotificationChannel();
-    Log.d(TAG, "sendVOIPNotification()");
-      // Prepare data from messageData
-      String caller = "Unknown caller";
-      if (messageData.containsKey("Username")) {
-          caller = messageData.get("Username");
-      }
-      String callId = messageData.get("callId");
-      String callbackUrl = messageData.get("callbackUrl");
+  private void showVOIPNotification(RemoteMessage remoteMessage) {
+    Map<String, String> messageData = remoteMessage.getData();
+    createNotificationChannel();
+    Log.d(TAG, "showVOIPNotification");
+    // Prepare data from messageData
+    String caller = "Unknown caller";
+    if (messageData.containsKey("Username")) {
+      caller = messageData.get("Username");
+    }
+    String callId = messageData.get("callId");
+    String callbackUrl = messageData.get("callbackUrl");
 
-      // Update Webhook status to CONNECTED
-     // updateWebhookVOIPStatus(callbackUrl, callId, IncomingCallActivity.VOIP_CONNECTED);
+    // Update Webhook status to CONNECTED
+    // updateWebhookVOIPStatus(callbackUrl, callId,
+    // IncomingCallActivity.VOIP_CONNECTED);
 
-      // Intent for LockScreen or tapping on notification
-      Intent fullScreenIntent = new Intent(this, IncomingCallActivity.class);
-      fullScreenIntent.putExtra("caller", caller);
-      PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
-              fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    // Intent for LockScreen or tapping on notification
+    Intent fullScreenIntent = new Intent(this, IncomingCallActivity.class);
+    fullScreenIntent.putExtra("caller", caller);
+    PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
+        fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-      // Intent for tapping on Answer
-      Intent acceptIntent = new Intent(IncomingCallActivity.VOIP_ACCEPT);
-      PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, 10, acceptIntent, 0);
+    // Intent for tapping on Answer
+    Intent acceptIntent = new Intent(IncomingCallActivity.VOIP_ACCEPT);
+    PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, 10, acceptIntent, 0);
 
-      // Intent for tapping on Reject
-      Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
-      PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20, declineIntent, 0);
+    // Intent for tapping on Reject
+    Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
+    PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20, declineIntent, 0);
 
-      NotificationCompat.Builder notificationBuilder =
-              new NotificationCompat.Builder(this, CHANNEL_VOIP)
-                      .setSmallIcon(R.drawable.pushicon)
-                      .setContentTitle("Incoming call")
-                      .setContentText(caller)
-                      .setPriority(NotificationCompat.PRIORITY_HIGH)
-                      .setCategory(NotificationCompat.CATEGORY_CALL)
-                      // Show main activity on lock screen or when tapping on notification
-                      .setFullScreenIntent(fullScreenPendingIntent, true)
-                      // Show Accept button
-                      .addAction(R.drawable.common_google_signin_btn_icon_dark_focused, "Accept",
-                              acceptPendingIntent)
-                      // Show decline action
-                      .addAction(R.drawable.common_google_signin_btn_icon_dark_focused, "Decline",
-                              declinePendingIntent)
-                      // Make notification dismiss on user input action
-                      .setAutoCancel(true)
-                      // Cannot be swiped by user
-                      .setOngoing(true)
-                      // Set ringtone to notification (< Android O)
-                      .setSound(defaultRingtoneUri());
+    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_VOIP)
+        .setSmallIcon(getResources().getIdentifier("pushicon", "drawable", getPackageName()))
+        .setContentTitle("Incoming call")
+        .setContentText(caller)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setCategory(NotificationCompat.CATEGORY_CALL)
+        // Show main activity on lock screen or when tapping on notification
+        .setFullScreenIntent(fullScreenPendingIntent, true)
+        // Show Accept button
+        .addAction(new NotificationCompat.Action(0, "Accept",
+            acceptPendingIntent))
+        // Show decline action
+        .addAction(new NotificationCompat.Action(0, "Decline",
+            declinePendingIntent))
+        // Make notification dismiss on user input action
+        .setAutoCancel(true)
+        // Cannot be swiped by user
+        .setOngoing(true)
+        // Set ringtone to notification (< Android O)
+        .setSound(defaultRingtoneUri());
+    // automatically cancels after 30 seconds
+    // .setTimeoutAfter(30000);
 
-      Notification incomingCallNotification = notificationBuilder.build();
+    Notification incomingCallNotification = notificationBuilder.build();
 
-      NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-      // Display notification
-      notificationManager.notify(VOIP_NOTIFICATION_ID, incomingCallNotification);
+    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+    // Display notification
+    notificationManager.notify(VOIP_NOTIFICATION_ID, incomingCallNotification);
 
-      // Add broadcast receiver for notification button actions
-      if (voipNotificationActionBR == null) {
-          IntentFilter filter = new IntentFilter();
-          filter.addAction(IncomingCallActivity.VOIP_ACCEPT);
-          filter.addAction(IncomingCallActivity.VOIP_DECLINE);
+    // Add broadcast receiver for notification button actions
+    if (voipNotificationActionBR == null) {
+      IntentFilter filter = new IntentFilter();
+      filter.addAction(IncomingCallActivity.VOIP_ACCEPT);
+      filter.addAction(IncomingCallActivity.VOIP_DECLINE);
+      Log.d(TAG, "Initializing BR");
+      Context appContext = this.getApplicationContext();
+      voipNotificationActionBR = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          // Remove BR after responding to notification action
+          appContext.unregisterReceiver(voipNotificationActionBR);
+          voipNotificationActionBR = null;
 
-          Context appContext = this.getApplicationContext();
+          // Handle action
+          dismissVOIPNotification();
+          String voipStatus = intent.getAction();
+          // Update Webhook status to CONNECTED
+          // updateWebhookVOIPStatus(callbackUrl, callId, voipStatus);
 
-          voipNotificationActionBR = new BroadcastReceiver() {
+          // Start cordova activity on answer
+          if (voipStatus.equals(IncomingCallActivity.VOIP_ACCEPT)) {
 
+            // Storing incomingCall data into SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
 
-              @Override
-              public void onReceive(Context context, Intent intent) {
-                  // Remove BR after responding to notification action
-                  appContext.unregisterReceiver(voipNotificationActionBR);
-                  voipNotificationActionBR = null;
+            // Creating an Editor object to edit(write to the file)
+            SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
-                  // Handle action
-                  dismissVOIPNotification();
-                  String voipStatus = intent.getAction();
-                  // Update Webhook status to CONNECTED
-                  //updateWebhookVOIPStatus(callbackUrl, callId, voipStatus);
+            // Storing the key and its value as the data fetched from edittext
+            myEdit.putBoolean("incomingCall", true);
 
-                  // Start cordova activity on answer
-                if (voipStatus.equals(IncomingCallActivity.VOIP_ACCEPT)) {
-                    Log.d(TAG, "voipStatus, start Cordova?");
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    startActivity(intentForLaunchActivity());
-                  }
-                }
-              }
-          };
+            // Once the changes have been made,
+            // we need to commit to apply those changes made,
+            // otherwise, it will throw an error
+            myEdit.commit();
 
-          appContext.registerReceiver(voipNotificationActionBR, filter);
-      }
+            startActivity(intentForLaunchActivity());
+            FirebasePushPlugin.onNewRemoteMessage(remoteMessage);
+            // FirebasePushPlugin.sendRemoteMessage(remoteMessage);
+          }
+        }
+      };
+      Log.d(TAG, "registering BR");
+      appContext.registerReceiver(voipNotificationActionBR, filter);
+    }
   }
 
   private void dismissVOIPNotification() {
-    NotificationManagerCompat.from(this).cancel(oneTimeID);
+    NotificationManagerCompat.from(this).cancel(VOIP_NOTIFICATION_ID);
     if (IncomingCallActivity.instance != null) {
       IncomingCallActivity.instance.finish();
     }
+  }
+
+  void incomingCall() {
+    SharedPreferences sharedPref = getSharedPreferences("application", Context.MODE_PRIVATE);
+    SharedPreferences.Editor editor = sharedPref.edit();
+    editor.putString("incomingCall", "true");
+    editor.apply();
   }
 
   private void showIncomingCallScreen(RemoteMessage remoteMessage, boolean isAppRunning) {
