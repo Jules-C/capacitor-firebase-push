@@ -41,22 +41,6 @@ public class IncomingCallActivity extends AppCompatActivity {
     public static IncomingCallActivity instance = null;
     String caller = "";
 
-    // @RequiresApi(api = Build.VERSION_CODES.O_MR1)
-    // @Override
-    // protected void onCreate(@Nullable Bundle savedInstanceState) {
-    //     super.onCreate(savedInstanceState);
-    //     setContentView(R.layout.activity_incoming_call);
-    //     setShowWhenLocked(true);
-    //     setTurnScreenOn(true);
-    //     getWindow().addFlags(
-    //             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-    //                     | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-    //                     | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-    //                     | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-    //                     | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-    //     );
-    //     stopService(new Intent(this, IncomingCallService.class));
-    // }
     public static final String NOTIFICATION_ID = "NOTIFICATION_ID";
     private Ringtone ringtone;
 
@@ -65,22 +49,7 @@ public class IncomingCallActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
       Log.d(TAG, "onCreate()ICA");
-        // Intent intent = getIntent();
-        // String action = intent.getAction();
-        // Uri data = intent.getData();
-
-        // //start
-        // if (!Settings.canDrawOverlays(this)) {
-        //     Uri incoming_call_notif = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-        //     ringtone = RingtoneManager.getRingtone(getApplicationContext(), incoming_call_notif);
-        //     Log.e("notificationActivity", String.valueOf(getIntent().getIntExtra(NOTIFICATION_ID, -1)));
-        //     NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        //     manager.cancel(getIntent().getIntExtra(NOTIFICATION_ID, -1));
-        //     ringtone.stop();
-        // }
-        // //end
-
-        setContentView(getResources().getIdentifier("activity_incoming_call", "layout", getPackageName()));
+       setContentView(getResources().getIdentifier("activity_incoming_call", "layout", getPackageName()));
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
@@ -221,14 +190,5 @@ public class IncomingCallActivity extends AppCompatActivity {
             }
         }
     }
-    // }
-
-    // public static PendingIntent getActionIntent(int notificationId, Uri uri, Context context) {
-    //     Intent intent =  new Intent(Intent.ACTION_VIEW,uri);
-    //     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    //     intent.putExtra(NOTIFICATION_ID, notificationId);
-    //     PendingIntent acceptIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-    //     return acceptIntent;
-    // }
 
 }

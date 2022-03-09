@@ -73,28 +73,6 @@ public class FirebasePushPlugin extends Plugin {
         data.put("value", isIncomingCall());
         call.resolve(data);
     }
-    // @PluginMethod
-    // public void register(PluginCall call) {
-    // new Handler()
-    // .post(
-    // () -> {
-    // FirebaseApp.initializeApp(this.getContext());
-    // registered = true;
-    // this.sendStacked();
-    // call.resolve();
-    //
-    // FirebaseInstallations
-    // .getInstance()
-    // .getToken(true)
-    // .addOnCompleteListener(
-    // task -> {
-    // if (task.isSuccessful()) {
-    // this.sendToken(task.getResult().getToken());
-    // }
-    // });
-    // });
-    // }
-
     @PluginMethod
     public void register(PluginCall call) {
         new Handler()
@@ -175,7 +153,6 @@ public class FirebasePushPlugin extends Plugin {
         call.resolve(result);
     }
 
-    // also removes all preferences from storage
     @PluginMethod
     public void removeDeliveredNotifications(PluginCall call) {
         JSArray notifications = call.getArray("ids");
@@ -198,13 +175,11 @@ public class FirebasePushPlugin extends Plugin {
 
       // Storing incomingCall data into SharedPreferences
 
-
       SharedPreferences sharedPref = this.getContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear();
         editor.apply();
         Log.d(TAG, "all shared preferences removed");
-
     }
 
     @PluginMethod
