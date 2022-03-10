@@ -1,7 +1,7 @@
 import type { PermissionState, PluginListenerHandle } from '@capacitor/core';
 export declare type PresentationOption = 'badge' | 'sound' | 'alert';
 declare module '@capacitor/cli' {
-    interface PluginsConfig {
+    export interface PluginsConfig {
         FirebasePush?: {
             /**
              * This is an array of strings you can combine. Possible values in the array are:
